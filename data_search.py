@@ -75,8 +75,11 @@ class search:
         met2 = mets[1]
         specificdf = self.data[(self.data["Year"] >= minnum) & (self.data["Year"] <= maxnum)]
         fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(x=specificdf["Year"],y=specificdf[met1]),secondary_y=False)
-        fig.add_trace(go.Scatter(x=specificdf["Year"],y=specificdf[met2]),secondary_y=True)
+        fig.add_trace(go.Scatter(x=specificdf["Year"],y=specificdf[met1], name=met1),secondary_y=False)
+        fig.add_trace(go.Scatter(x=specificdf["Year"],y=specificdf[met2], name=met2),secondary_y=True)
+        fig.update_yaxes(title_text=f"{met1} Measure", secondary_y=False)
+        fig.update_yaxes(title_text=f"{met2} Measure", secondary_y=True)
+
         fig.show()
 
 
