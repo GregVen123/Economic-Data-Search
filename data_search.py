@@ -77,7 +77,6 @@ class search:
                 print("ERROR: Not a valid entry")
 
         return (dict_pair[num_metric],dict_pair[second_num_metric]) #returns tuple of both indicators user wants to compare
-        
     
 # This function uses plotly to make a graph and calls the other functions for the user to input what he wants to measure
     def make_graph(self):
@@ -94,6 +93,7 @@ class search:
         fig.add_trace(go.Scatter(x=specificdf["Year"],y=specificdf[met2], name=met2),secondary_y=True)
         fig.update_yaxes(title_text=f"{met1} Measure", secondary_y=False)
         fig.update_yaxes(title_text=f"{met2} Measure", secondary_y=True)
+        fig.update_layout(title=f"Comparison of {met1} and {met2}")
         correl = specificdf[met1].corr(specificdf[met2])
         if correl >=0:
             print(f"There is a postiive correlation of {correl} between {met1} and {met2}")
@@ -166,41 +166,156 @@ class search:
         max_streak = max(streaks) 
         print(f"\nLongest streak in years for {single_metric} above the threshold {threshold} is: {max_streak} years")
 
-
-
-
-
-
-    def search_menu(self):#this function will allow the user to choose between finding summary stast for two metrics, or comparing them
-        print("***Menu***\nWelcome to the economic data search, please choose an option\n1. I would to get compare two different metrics on a graph and see how they correlate" \
-        "\n2. I want to find summary statistics for two different metrics\n3. I want to check a metric's longest streak above a threshold value")
-        while True:
+    def search_menu(self):  # this function allows the user to choose between analysis options
+        print("***Menu***\nWelcome to the economic data search, please choose an option\n"#menu
+            "1. I would like to compare two different metrics on a graph and see how they correlate\n"
+            "2. I want to find summary statistics for two different metrics\n"
+            "3. I want to check a metric's longest streak above a threshold value")
+    
+        while True:#runs to make sure user inputs 1,2 or 3 based on menu
             try:
                 user_choice = int(input("Please choose an option 1, 2, or 3: "))
                 if user_choice == 1:
                     self.make_graph()
-                elif user_choice ==2:
+                elif user_choice == 2:
                     self.summarize_metrics_in_range()
-                elif user_choice ==3:
+                elif user_choice == 3:
                     self.longest_streak_one_metric()
                 else:
-                    raise ValueError
-            except:
-                print("Invalid, choose either 1 or 2 or 3")
-            while True:  
+                    print("Invalid, choose either 1 or 2 or 3")
+                    continue
+            except ValueError: #catches non 1,2 or 3s
+                print("Invalid input. Please enter a number (1, 2, or 3).")
+                continue
+
+            while True:  #this part of the function makes it so the search either repeats or ends 
                 go_again = input("Would you like to search again? (say either yes/no in lowercase): ")
-                if go_again == "yes":
+                if go_again == "yes":#takes user input and if yes breaks and goes back to menu
                     break  
                 elif go_again == "no":
                     print("Thank you for using the economic search.")
-                    return None
+                    return None #ends it
                 else:
-                    print("Invalid input. Please enter 'yes' or 'no'")
+                    print("Invalid input. Please enter 'yes' or 'no'")#catches errors
+
+#***    TESTING    ***
+
+#PLEASE READ THIS ***********
+#--------------------------------------
+#It is probably easier to just read the commented out code I put below each print statement than actually running it
+#I commented out the expected and actual ouputs
+#If you run the code yourself I put print statements showing what to input to test but since its kinda dense I also just commented what the output was for me
+# and it matches the expected value for each function
+# if you do run it, plotly sometimes takes along time to load or needs a couple of times to run on my PC im not sure if thats just my PC, but if that happens to you it makes testing this 
+# annoying so to make it easy I just commented the actual output below each print statement
+#----------------------------------------------
+
+#Test 1: testing if GDP Growth, inflation rate, and SP500 are correctly calculated
+print(f"Expected 1955 GDP Growth: {round((425.478-390.549)/390.549,4)} Actual: {economic_data[economic_data['Year'] == 1955]['GDP Growth'].values[0]}")
+print(f"Expected 1955 Inflation: {round((26.8-26.7)/26.7,4)} Actual: {economic_data[economic_data['Year'] == 1955]['Inflation'].values[0]}")
+print(f"Expected 1955 SP500: {26.4/100} Actual: {economic_data[economic_data['Year'] == 1955]['SP500'].values[0]}")
+# Expected 1955 GDP Growth: 0.0894 Actual: 0.0894
+# Expected 1955 Inflation: 0.0037 Actual: 0.0037
+# Expected 1955 SP500: 0.264 Actual: 0.264
+# searcher = search(economic_data)
+
+#Now to test the data search
+searcher = search(economic_data)
+# print("\nINPUT 1990 and 2000\n")
+# print(f"\nExpected (1990, 2000) Actual: {searcher.take_year_input()}\n")
+# # returns (1990, 2000)
+# #AS EXPECTED
+
+# #Now to test take two metrics
+# print("\nINPUT 1 and 2\n")
+# print(f"\nEXPECTED ('GDP','SP500') ACTIAL {searcher.take_two_metrics()}\n")
+# #Returns ('GDP','SP500')
+# #AS EXPECTED
+
+# #Now to test make_graph
+# print("\nInput 1990-2000 and select 2 and 5\n") 
+# #searcher.make_graph()
+# print("\nECPECTED: There is a negative correlation of -0.6111770411826631 between SP500 and Inflation and a graph should pop up\n")
+# #EXPECTED: There is a negative correlation of -0.6111770411826631 between SP500 and Inflation and a graph pops up
+# #ACTUAL: There is a negative correlation of -0.6111770411826631 between SP500 and Inflation and a graph pops up
+# #AS EXPECTED
+
+# print("\nINPUT 1990 and 2000 for the years and 2 and 5 for the metrics TO TEST summarize metrics\n")
+# #searcher.summarize_metrics_in_range()
+# #EXPECTS AND ACTUALLY OUTPUTS: 
+# # STATISTICAL SUMMARY FOR SP500
+
+# In year range 1990-2000:
+# Highest Year for SP500: 1995 : 0.3411
+# Lowest Year for SP500: 2000 : -0.1014
+# The Mean SP500 during 1990-2000 was: 0.13742727272727273
+# And the Standard Deviation was: 0.15687503364722566
+
+# STATISTICAL SUMMARY FOR Inflation 
+
+# In year range 1990-2000:
+# Highest Year for Inflation: 1990 : 0.0611
+# Lowest Year for Inflation: 1998 : 0.0161
+# The Mean Inflation during 1990-2000 was: 0.029754545454545454
+# And the Standard Deviation was: 0.011849503250040793
+
+#AND THAT IS THE ACTUAL OUTPUT
+
+#now to test longest streak
+#print("\nINPUT 2 and .1 threshold (represents 10%)\n")
+#searcher.longest_streak_one_metric()
+#EXPECTED: Longest streak in years for SP500 above the threshold 0.1 is: 5 years
+#ACTUAL:   Longest streak in years for SP500 above the threshold 0.1 is: 5 years
+#AS EXPECTED
+
+#now to test the search menu function
+#print("\nInput wrong values to see if it catches errors and then try and use the menu to do numer 1 and repeat to do 3 and then quit\n")
+searcher.search_menu()
+
+#WORKS AS EXPECTED 
 
 
+# ***Menu***
+# Welcome to the economic data search, please choose an option
+# 1. I would like to compare two different metrics on a graph and see how they correlate
+# 2. I want to find summary statistics for two different metrics
+# 3. I want to check a metric's longest streak above a threshold value
+# Please choose an option 1, 2, or 3: 3
+# Pick a number representing the metric you want to analyze out of the following:
+# 1: GDP
+# 2: S&P500 Returns
+# 3: CPI
+# 4: Average Federal Funds Rate
+# 5: Inflation
+# 6: Nominal GDP Growth Rate
+# Pick a number 1-6: 3
+# SELECTED: CPI
+# Enter a threshold for CPI (EXAMPLE: enter .05 for inflation above 5% (percents should be in decimal form)): 250
 
-
-
-dev = search(economic_data)
-
-dev.search_menu()
+# Longest streak in years for CPI above the threshold 250.0 is: 7 years
+# Would you like to search again? (say either yes/no in lowercase): yes
+# Please choose an option 1, 2, or 3: 1
+# What is the first year in the  range for query (1954 minimum): 1990
+# What year last year in the range for your query (2024 maximum): 2015
+# Pick a number representing the metric you want to analyze out of the following:
+# 1: GDP
+# 2: S&P500 Returns
+# 3: CPI
+# 4: Average Federal Funds Rate
+# 5: Inflation
+# 6: Nominal GDP Growth Rate
+# Pick a number 1-6: 1
+# Pick a second number representing the metric you want to analyze out of the following:
+# 1: GDP
+# 2: S&P500 Returns
+# 3: CPI
+# 4: Average Federal Funds Rate
+# 5: Inflation
+# 6: Nominal GDP Growth Rate
+# Pick a number 1-6: 3
+# SELECTED: GDP
+# SELECTED: CPI
+# There is a postiive correlation of 0.9964497173894271 between GDP and CPI
+# Would you like to search again? (say either yes/no in lowercase): no
+# Thank you for using the economic search.
+#AND SHOWS GRAPH
